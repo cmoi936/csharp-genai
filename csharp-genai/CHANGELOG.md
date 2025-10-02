@@ -5,11 +5,27 @@ All notable changes to the Google Gen AI SDK for C#/.NET will be documented in t
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+### Changed
+- Renamed `Client` class to `GeminiChatClient` to better reflect its purpose
+- Added `IChatClient` interface implementation from Microsoft.Extensions.AI
+- Added backward compatibility alias `Client` (marked as obsolete)
+- Updated all documentation to use `GeminiChatClient`
+
+### Added
+- Microsoft.Extensions.AI integration:
+  - `CompleteAsync` method for standard chat completion
+  - `CompleteStreamingAsync` method for streaming responses
+  - `GetService<T>` method for service discovery
+  - `Metadata` property with provider information
+- Support for `ChatMessage`, `ChatOptions`, and `ChatCompletion` types
+
 ## [1.0.0] - 2025-01-02
 
 ### Added
 - Initial release of Google Gen AI SDK for C#/.NET
-- Client initialization for Gemini Developer API and Vertex AI
+- GeminiChatClient initialization for Gemini Developer API and Vertex AI
 - Generate content with text and multi-modal inputs
 - System instructions and generation configuration support
 - Configuration options:

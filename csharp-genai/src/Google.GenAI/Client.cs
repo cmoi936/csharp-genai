@@ -13,7 +13,13 @@
 // limitations under the License.
 
 using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Net.Http;
+using System.Runtime.CompilerServices;
+using System.Threading;
+using System.Threading.Tasks;
+using Microsoft.Extensions.AI;
 using Google.GenAI.Models;
 using Google.GenAI.Types;
 
@@ -22,8 +28,9 @@ namespace Google.GenAI
     /// <summary>
     /// Client for making requests to Google's Generative AI services.
     /// Supports both Gemini Developer API and Vertex AI.
+    /// Implements the Microsoft.Extensions.AI.IChatClient interface.
     /// </summary>
-    public class Client : IDisposable
+    public class GeminiChatClient : IChatClient, IDisposable
     {
         private readonly HttpClient _httpClient;
         private readonly string? _apiKey;
@@ -31,6 +38,7 @@ namespace Google.GenAI
         private readonly string? _projectId;
         private readonly string? _location;
         private readonly ModelsClient _models;
+        private readonly string _defaultModelId;
         private bool _disposed;
 
         /// <summary>
@@ -39,26 +47,39 @@ namespace Google.GenAI
         public ModelsClient Models => _models;
 
         /// <summary>
-        /// Initializes a new instance of the Client class for Gemini Developer API.
+        /// Gets metadata that describes the IChatClient.
+        /// </summary>
+        public ChatClientMetadata Metadata { get; }
+
+        /// <summary>
+        /// Initializes a new instance of the GeminiChatClient class for Gemini Developer API.
         /// </summary>
         /// <param name="apiKey">The API key for authentication. If null, will attempt to read from environment variable GEMINI_API_KEY or GOOGLE_API_KEY.</param>
+        /// <param name="modelId">The default model ID to use (defaults to "gemini-2.0-flash-001").</param>
         /// <param name="httpOptions">Optional HTTP configuration options.</param>
-        public Client(string? apiKey = null, HttpOptions? httpOptions = null)
+        public GeminiChatClient(string? apiKey = null, string? modelId = null, HttpOptions? httpOptions = null)
         {
             _apiKey = apiKey ?? GetApiKeyFromEnvironment();
             _vertexAi = false;
+            _defaultModelId = modelId ?? "gemini-2.0-flash-001";
             _httpClient = CreateHttpClient(httpOptions);
             _models = new ModelsClient(this, _httpClient, _apiKey, _vertexAi, null, null);
+            Metadata = new ChatClientMetadata(
+                providerName: "Google Gemini",
+                providerUri: new Uri("https://generativelanguage.googleapis.com"),
+                modelId: _defaultModelId
+            );
         }
 
         /// <summary>
-        /// Initializes a new instance of the Client class for Vertex AI.
+        /// Initializes a new instance of the GeminiChatClient class for Vertex AI.
         /// </summary>
         /// <param name="vertexAi">Set to true to use Vertex AI.</param>
         /// <param name="projectId">The Google Cloud project ID.</param>
         /// <param name="location">The location/region for Vertex AI (e.g., "us-central1").</param>
+        /// <param name="modelId">The default model ID to use (defaults to "gemini-2.0-flash-001").</param>
         /// <param name="httpOptions">Optional HTTP configuration options.</param>
-        public Client(bool vertexAi, string projectId, string location, HttpOptions? httpOptions = null)
+        public GeminiChatClient(bool vertexAi, string projectId, string location, string? modelId = null, HttpOptions? httpOptions = null)
         {
             if (!vertexAi)
                 throw new ArgumentException("When using this constructor, vertexAi must be true");
@@ -66,8 +87,14 @@ namespace Google.GenAI
             _vertexAi = true;
             _projectId = projectId ?? throw new ArgumentNullException(nameof(projectId));
             _location = location ?? throw new ArgumentNullException(nameof(location));
+            _defaultModelId = modelId ?? "gemini-2.0-flash-001";
             _httpClient = CreateHttpClient(httpOptions);
             _models = new ModelsClient(this, _httpClient, null, _vertexAi, _projectId, _location);
+            Metadata = new ChatClientMetadata(
+                providerName: "Google Vertex AI",
+                providerUri: new Uri($"https://{_location}-aiplatform.googleapis.com"),
+                modelId: _defaultModelId
+            );
         }
 
         private static string? GetApiKeyFromEnvironment()
@@ -85,6 +112,161 @@ namespace Google.GenAI
             };
             
             return client;
+        }
+
+        /// <summary>
+        /// Sends chat messages to the model and returns the response messages.
+        /// </summary>
+        /// <param name="chatMessages">The chat content to send.</param>
+        /// <param name="options">The chat options to configure the request.</param>
+        /// <param name="cancellationToken">The cancellation token to monitor for cancellation requests.</param>
+        /// <returns>The response messages generated by the client.</returns>
+        public async Task<ChatCompletion> CompleteAsync(
+            IList<ChatMessage> chatMessages,
+            ChatOptions? options = null,
+            CancellationToken cancellationToken = default)
+        {
+            var modelId = options?.ModelId ?? _defaultModelId;
+            
+            // Convert ChatMessage to our Content format
+            var contents = ConvertChatMessagesToContents(chatMessages);
+            
+            // Build config from ChatOptions
+            var config = BuildGenerateContentConfig(options);
+            
+            // Call our existing generate content method
+            var response = await _models.GenerateContentAsync(modelId, contents, config, cancellationToken);
+            
+            // Convert response to ChatCompletion
+            return ConvertToChatCompletion(response, modelId);
+        }
+
+        /// <summary>
+        /// Sends chat messages to the model and streams the response messages.
+        /// </summary>
+        /// <param name="chatMessages">The chat content to send.</param>
+        /// <param name="options">The chat options to configure the request.</param>
+        /// <param name="cancellationToken">The cancellation token to monitor for cancellation requests.</param>
+        /// <returns>An async enumerable of streaming response messages.</returns>
+        public async IAsyncEnumerable<StreamingChatCompletionUpdate> CompleteStreamingAsync(
+            IList<ChatMessage> chatMessages,
+            ChatOptions? options = null,
+            [EnumeratorCancellation] CancellationToken cancellationToken = default)
+        {
+            // For now, return a single completion as a stream
+            // Full streaming support can be added later
+            var completion = await CompleteAsync(chatMessages, options, cancellationToken);
+            
+            yield return new StreamingChatCompletionUpdate
+            {
+                CompletionId = completion.CompletionId,
+                Contents = completion.Message.Contents,
+                Role = completion.Message.Role,
+                FinishReason = completion.FinishReason
+            };
+        }
+
+        /// <summary>
+        /// Asks the IChatClient for an object of type TService.
+        /// </summary>
+        /// <typeparam name="TService">The type of the object to be retrieved.</typeparam>
+        /// <param name="key">An optional key that may be used to help identify the target service.</param>
+        /// <returns>The found object, otherwise null.</returns>
+        public TService? GetService<TService>(object? key = null) where TService : class
+        {
+            if (typeof(TService) == typeof(GeminiChatClient))
+            {
+                return this as TService;
+            }
+            
+            return null;
+        }
+
+        private List<Content> ConvertChatMessagesToContents(IList<ChatMessage> chatMessages)
+        {
+            var contents = new List<Content>();
+            
+            foreach (var message in chatMessages)
+            {
+                var content = new Content
+                {
+                    Role = message.Role.Value.ToLowerInvariant(),
+                    Parts = new List<Part>()
+                };
+                
+                foreach (var item in message.Contents)
+                {
+                    if (item is TextContent textContent)
+                    {
+                        content.Parts.Add(Part.FromText(textContent.Text));
+                    }
+                    else if (item is ImageContent imageContent && imageContent.Uri != null)
+                    {
+                        content.Parts.Add(Part.FromUri(
+                            imageContent.Uri.ToString(),
+                            imageContent.MediaType ?? "image/jpeg"
+                        ));
+                    }
+                }
+                
+                contents.Add(content);
+            }
+            
+            return contents;
+        }
+
+        private GenerateContentConfig? BuildGenerateContentConfig(ChatOptions? options)
+        {
+            if (options == null)
+                return null;
+                
+            return new GenerateContentConfig
+            {
+                Temperature = options.Temperature,
+                MaxOutputTokens = options.MaxOutputTokens,
+                TopP = options.TopP,
+                ResponseMimeType = options.ResponseFormat == ChatResponseFormat.Json 
+                    ? "application/json" 
+                    : null
+            };
+        }
+
+        private ChatCompletion ConvertToChatCompletion(GenerateContentResponse response, string modelId)
+        {
+            var chatMessage = new ChatMessage
+            {
+                Role = ChatRole.Assistant,
+                Contents = new List<AIContent>()
+            };
+            
+            if (response.Candidates.Count > 0 && response.Candidates[0].Content != null)
+            {
+                var candidate = response.Candidates[0];
+                var content = candidate.Content;
+                if (content != null)
+                {
+                    foreach (var part in content.Parts)
+                    {
+                        if (part.Text != null)
+                        {
+                            chatMessage.Contents.Add(new TextContent(part.Text));
+                        }
+                    }
+                }
+            }
+            
+            var completion = new ChatCompletion(chatMessage)
+            {
+                ModelId = modelId,
+                FinishReason = response.Candidates.FirstOrDefault()?.FinishReason switch
+                {
+                    "STOP" => ChatFinishReason.Stop,
+                    "MAX_TOKENS" => ChatFinishReason.Length,
+                    _ => null
+                }
+            };
+            
+            return completion;
         }
 
         /// <summary>
@@ -106,6 +288,26 @@ namespace Google.GenAI
                 }
                 _disposed = true;
             }
+        }
+    }
+
+    /// <summary>
+    /// Backward compatibility alias for GeminiChatClient.
+    /// Use GeminiChatClient for new code.
+    /// </summary>
+    [Obsolete("Use GeminiChatClient instead. This alias will be removed in a future version.")]
+    public class Client : GeminiChatClient
+    {
+        /// <inheritdoc/>
+        public Client(string? apiKey = null, string? modelId = null, HttpOptions? httpOptions = null)
+            : base(apiKey, modelId, httpOptions)
+        {
+        }
+
+        /// <inheritdoc/>
+        public Client(bool vertexAi, string projectId, string location, string? modelId = null, HttpOptions? httpOptions = null)
+            : base(vertexAi, projectId, location, modelId, httpOptions)
+        {
         }
     }
 }

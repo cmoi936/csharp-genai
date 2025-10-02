@@ -25,7 +25,7 @@ csharp-genai/
 
 ## Core Components
 
-### 1. Client Class
+### 1. GeminiChatClient Class
 
 The `Client` class is the main entry point for the SDK. It:
 - Manages HTTP connections
@@ -42,7 +42,7 @@ Client
 └── (Future: Chats, Files, Caches, Tunings, Batches)
 ```
 
-### 2. ModelsClient Class
+### 2. ModelsGeminiChatClient Class
 
 Handles all model-related operations:
 - Generate content (text, multi-modal)
@@ -120,13 +120,13 @@ The SDK supports two API endpoints:
 - Base URL: `https://generativelanguage.googleapis.com/v1beta/`
 - Authentication: API key (query parameter or header)
 - Simpler setup for developers
-- Usage: `new Client(apiKey: "YOUR_KEY")`
+- Usage: `new GeminiChatClient(apiKey: "YOUR_KEY")`
 
 ### Vertex AI
 - Base URL: `https://{location}-aiplatform.googleapis.com/v1/`
 - Authentication: Google Cloud authentication
 - Enterprise features
-- Usage: `new Client(vertexAi: true, projectId: "...", location: "...")`
+- Usage: `new GeminiChatClient(vertexAi: true, projectId: "...", location: "...")`
 
 ## Design Principles
 
@@ -231,7 +231,7 @@ The C# SDK mirrors the Python SDK's API design:
 
 | Python | C# |
 |--------|-----|
-| `client = genai.Client(api_key=...)` | `var client = new Client(apiKey: ...)` |
+| `client = genai.Client(api_key=...)` | `var client = new GeminiChatClient(apiKey: ...)` |
 | `client.models.generate_content()` | `client.Models.GenerateContentAsync()` |
 | `types.Content(...)` | `new Content { ... }` |
 | `types.GenerateContentConfig(...)` | `new GenerateContentConfig { ... }` |

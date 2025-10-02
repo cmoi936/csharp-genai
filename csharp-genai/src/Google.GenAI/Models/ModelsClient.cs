@@ -29,14 +29,14 @@ namespace Google.GenAI.Models
     /// </summary>
     public class ModelsClient
     {
-        private readonly Client _client;
+        private readonly GeminiChatClient _client;
         private readonly HttpClient _httpClient;
         private readonly string? _apiKey;
         private readonly bool _vertexAi;
         private readonly string? _projectId;
         private readonly string? _location;
 
-        internal ModelsClient(Client client, HttpClient httpClient, string? apiKey, bool vertexAi, string? projectId, string? location)
+        internal ModelsClient(GeminiChatClient client, HttpClient httpClient, string? apiKey, bool vertexAi, string? projectId, string? location)
         {
             _client = client;
             _httpClient = httpClient;

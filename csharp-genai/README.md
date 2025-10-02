@@ -37,7 +37,7 @@ using Google.GenAI;
 using Google.GenAI.Types;
 
 // Create a client with API key
-var client = new Client(apiKey: "YOUR_GEMINI_API_KEY");
+var client = new GeminiChatClient(apiKey: "YOUR_GEMINI_API_KEY");
 
 // Generate content
 var response = await client.Models.GenerateContentAsync(
@@ -48,6 +48,8 @@ var response = await client.Models.GenerateContentAsync(
 Console.WriteLine(response.Text);
 ```
 
+**Note:** The client implements `Microsoft.Extensions.AI.IChatClient` interface for compatibility with the Microsoft.Extensions.AI ecosystem.
+
 ### Using Vertex AI
 
 ```csharp
@@ -55,7 +57,7 @@ using Google.GenAI;
 using Google.GenAI.Types;
 
 // Create a client for Vertex AI
-var client = new Client(
+var client = new GeminiChatClient(
     vertexAi: true,
     projectId: "your-project-id",
     location: "us-central1"
@@ -81,8 +83,32 @@ export GEMINI_API_KEY='your-api-key'
 Then create a client without explicitly passing the API key:
 
 ```csharp
-var client = new Client();
+var client = new GeminiChatClient();
 ```
+
+## Microsoft.Extensions.AI Compatibility
+
+`GeminiChatClient` implements the `IChatClient` interface from Microsoft.Extensions.AI, allowing seamless integration with the Microsoft AI ecosystem:
+
+```csharp
+using Microsoft.Extensions.AI;
+using Google.GenAI;
+
+// Use as IChatClient
+IChatClient chatClient = new GeminiChatClient();
+
+// Use the standard CompleteAsync method
+var completion = await chatClient.CompleteAsync(
+    new List<ChatMessage>
+    {
+        new ChatMessage(ChatRole.User, "What is C#?")
+    }
+);
+
+Console.WriteLine(completion.Message.Text);
+```
+
+This enables integration with Microsoft's AI abstractions, dependency injection, and other ecosystem tools.
 
 ## Advanced Usage
 
@@ -92,7 +118,7 @@ var client = new Client();
 using Google.GenAI;
 using Google.GenAI.Types;
 
-var client = new Client();
+var client = new GeminiChatClient();
 
 var config = new GenerateContentConfig
 {
@@ -118,7 +144,7 @@ Console.WriteLine(response.Text);
 using Google.GenAI;
 using Google.GenAI.Types;
 
-var client = new Client();
+var client = new GeminiChatClient();
 
 var content = new Content
 {
@@ -147,7 +173,7 @@ Console.WriteLine(response.Text);
 using Google.GenAI;
 using Google.GenAI.Types;
 
-var client = new Client();
+var client = new GeminiChatClient();
 
 var config = new GenerateContentConfig
 {
@@ -170,7 +196,7 @@ All async methods have synchronous counterparts:
 ```csharp
 using Google.GenAI;
 
-var client = new Client();
+var client = new GeminiChatClient();
 
 // Synchronous call
 var response = client.Models.GenerateContent(
@@ -186,7 +212,7 @@ Console.WriteLine(response.Text);
 The client implements `IDisposable` and should be disposed when no longer needed:
 
 ```csharp
-using (var client = new Client())
+using (var client = new GeminiChatClient())
 {
     var response = await client.Models.GenerateContentAsync(
         model: "gemini-2.0-flash-001",
@@ -199,7 +225,7 @@ using (var client = new Client())
 Or manually:
 
 ```csharp
-var client = new Client();
+var client = new GeminiChatClient();
 try
 {
     var response = await client.Models.GenerateContentAsync(

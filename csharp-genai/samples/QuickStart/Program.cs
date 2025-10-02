@@ -34,7 +34,7 @@ if (string.IsNullOrEmpty(apiKey))
 try
 {
     // Create client
-    using var client = new Client(apiKey: apiKey);
+    using var client = new GeminiChatClient(apiKey: apiKey);
     
     Console.WriteLine("✓ Client created successfully\n");
 

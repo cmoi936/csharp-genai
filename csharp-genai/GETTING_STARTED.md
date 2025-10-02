@@ -71,7 +71,7 @@ using Google.GenAI;
 using Google.GenAI.Types;
 
 // Create a client
-using var client = new Client();
+using var client = new GeminiChatClient();
 
 // Generate content
 var response = await client.Models.GenerateContentAsync(
@@ -95,7 +95,7 @@ dotnet run
 ```csharp
 using Google.GenAI;
 
-using var client = new Client(apiKey: "your-api-key");
+using var client = new GeminiChatClient(apiKey: "your-api-key");
 
 var response = await client.Models.GenerateContentAsync(
     model: "gemini-2.0-flash-001",
@@ -111,7 +111,7 @@ Console.WriteLine(response.Text);
 using Google.GenAI;
 using Google.GenAI.Types;
 
-using var client = new Client();
+using var client = new GeminiChatClient();
 
 var config = new GenerateContentConfig
 {
@@ -137,7 +137,7 @@ Console.WriteLine(response.Text);
 using Google.GenAI;
 using Google.GenAI.Types;
 
-using var client = new Client();
+using var client = new GeminiChatClient();
 
 var content = new Content
 {
@@ -166,7 +166,7 @@ Console.WriteLine(response.Text);
 using Google.GenAI;
 using Google.GenAI.Types;
 
-using var client = new Client();
+using var client = new GeminiChatClient();
 
 var config = new GenerateContentConfig
 {
@@ -189,7 +189,7 @@ If you prefer synchronous code:
 ```csharp
 using Google.GenAI;
 
-using var client = new Client();
+using var client = new GeminiChatClient();
 
 // Synchronous call
 var response = client.Models.GenerateContent(
@@ -205,7 +205,7 @@ Console.WriteLine(response.Text);
 ```csharp
 using Google.GenAI;
 
-using var client = new Client(
+using var client = new GeminiChatClient(
     vertexAi: true,
     projectId: "your-gcp-project-id",
     location: "us-central1"
@@ -226,7 +226,7 @@ Console.WriteLine(response.Text);
 Always use `using` statements or manually dispose the client:
 
 ```csharp
-using (var client = new Client())
+using (var client = new GeminiChatClient())
 {
     var response = await client.Models.GenerateContentAsync(
         model: "gemini-2.0-flash-001",
@@ -244,7 +244,7 @@ using Google.GenAI;
 
 try
 {
-    using var client = new Client();
+    using var client = new GeminiChatClient();
     var response = await client.Models.GenerateContentAsync(
         model: "invalid-model-name",
         contents: "Hello!"
