@@ -55,15 +55,15 @@ namespace Google.GenAI
         /// Initializes a new instance of the GeminiChatClient class for Gemini Developer API.
         /// </summary>
         /// <param name="apiKey">The API key for authentication. If null, will attempt to read from environment variable GEMINI_API_KEY or GOOGLE_API_KEY.</param>
-        /// <param name="modelId">The default model ID to use (defaults to "gemini-2.0-flash-001").</param>
+        /// <param name="model">The model ID to use (e.g., "gemini-2.0-flash-001").</param>
         /// <param name="httpOptions">Optional HTTP configuration options.</param>
-        public GeminiChatClient(string? apiKey = null, string? modelId = null, HttpOptions? httpOptions = null)
+        public GeminiChatClient(string? apiKey, string model, HttpOptions? httpOptions = null)
         {
             _apiKey = apiKey ?? GetApiKeyFromEnvironment();
             _vertexAi = false;
-            _defaultModelId = modelId ?? "gemini-2.0-flash-001";
+            _defaultModelId = model ?? throw new ArgumentNullException(nameof(model));
             _httpClient = CreateHttpClient(httpOptions);
-            _models = new ModelsClient(this, _httpClient, _apiKey, _vertexAi, null, null);
+            _models = new ModelsClient(this, _httpClient, _apiKey, _vertexAi, null, null, _defaultModelId);
             Metadata = new ChatClientMetadata(
                 providerName: "Google Gemini",
                 providerUri: new Uri("https://generativelanguage.googleapis.com"),
@@ -77,9 +77,9 @@ namespace Google.GenAI
         /// <param name="vertexAi">Set to true to use Vertex AI.</param>
         /// <param name="projectId">The Google Cloud project ID.</param>
         /// <param name="location">The location/region for Vertex AI (e.g., "us-central1").</param>
-        /// <param name="modelId">The default model ID to use (defaults to "gemini-2.0-flash-001").</param>
+        /// <param name="model">The model ID to use (e.g., "gemini-2.0-flash-001").</param>
         /// <param name="httpOptions">Optional HTTP configuration options.</param>
-        public GeminiChatClient(bool vertexAi, string projectId, string location, string? modelId = null, HttpOptions? httpOptions = null)
+        public GeminiChatClient(bool vertexAi, string projectId, string location, string model, HttpOptions? httpOptions = null)
         {
             if (!vertexAi)
                 throw new ArgumentException("When using this constructor, vertexAi must be true");
@@ -87,9 +87,9 @@ namespace Google.GenAI
             _vertexAi = true;
             _projectId = projectId ?? throw new ArgumentNullException(nameof(projectId));
             _location = location ?? throw new ArgumentNullException(nameof(location));
-            _defaultModelId = modelId ?? "gemini-2.0-flash-001";
+            _defaultModelId = model ?? throw new ArgumentNullException(nameof(model));
             _httpClient = CreateHttpClient(httpOptions);
-            _models = new ModelsClient(this, _httpClient, null, _vertexAi, _projectId, _location);
+            _models = new ModelsClient(this, _httpClient, null, _vertexAi, _projectId, _location, _defaultModelId);
             Metadata = new ChatClientMetadata(
                 providerName: "Google Vertex AI",
                 providerUri: new Uri($"https://{_location}-aiplatform.googleapis.com"),
@@ -126,19 +126,17 @@ namespace Google.GenAI
             ChatOptions? options = null,
             CancellationToken cancellationToken = default)
         {
-            var modelId = options?.ModelId ?? _defaultModelId;
-            
             // Convert ChatMessage to our Content format
             var contents = ConvertChatMessagesToContents(chatMessages);
             
             // Build config from ChatOptions
             var config = BuildGenerateContentConfig(options);
             
-            // Call our existing generate content method
-            var response = await _models.GenerateContentAsync(modelId, contents, config, cancellationToken);
+            // Call our existing generate content method (uses the default model from constructor)
+            var response = await _models.GenerateContentAsync(contents, config, cancellationToken);
             
             // Convert response to ChatCompletion
-            return ConvertToChatCompletion(response, modelId);
+            return ConvertToChatCompletion(response, _defaultModelId);
         }
 
         /// <summary>
@@ -300,13 +298,13 @@ namespace Google.GenAI
     {
         /// <inheritdoc/>
         public Client(string? apiKey = null, string? modelId = null, HttpOptions? httpOptions = null)
-            : base(apiKey, modelId, httpOptions)
+            : base(apiKey, modelId ?? "gemini-2.0-flash-001", httpOptions)
         {
         }
 
         /// <inheritdoc/>
         public Client(bool vertexAi, string projectId, string location, string? modelId = null, HttpOptions? httpOptions = null)
-            : base(vertexAi, projectId, location, modelId, httpOptions)
+            : base(vertexAi, projectId, location, modelId ?? "gemini-2.0-flash-001", httpOptions)
         {
         }
     }

@@ -9,18 +9,11 @@
 
 -----
 
-Google Gen AI SDK provides an interface for developers to integrate
-Google's generative models into their applications. It supports the
+Google Gen AI Python SDK provides an interface for developers to integrate
+Google's generative models into their Python applications. It supports the
 [Gemini Developer API](https://ai.google.dev/gemini-api/docs) and
 [Vertex AI](https://cloud.google.com/vertex-ai/generative-ai/docs/learn/overview)
 APIs.
-
-## Available SDKs
-
-- **Python SDK** (this directory): Full-featured SDK for Python 3.9+
-- **[C#/.NET SDK](csharp-genai/README.md)**: SDK for .NET 8.0+ applications
-
-The Python SDK is the primary, full-featured implementation. The C# SDK is a port that provides core functionality for .NET developers.
 
 ## Installation
 

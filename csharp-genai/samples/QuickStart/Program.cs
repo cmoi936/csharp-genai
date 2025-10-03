@@ -33,8 +33,8 @@ if (string.IsNullOrEmpty(apiKey))
 
 try
 {
-    // Create client
-    using var client = new GeminiChatClient(apiKey: apiKey);
+    // Create client with API key and model
+    using var client = new GeminiChatClient(apiKey: apiKey, model: "gemini-2.0-flash-001");
     
     Console.WriteLine("✓ Client created successfully\n");
 
@@ -42,7 +42,6 @@ try
     Console.WriteLine("Example 1: Simple Text Generation");
     Console.WriteLine("----------------------------------");
     var response1 = await client.Models.GenerateContentAsync(
-        model: "gemini-2.0-flash-001",
         contents: "Why is the sky blue? Answer in one sentence."
     );
     Console.WriteLine($"Response: {response1.Text}\n");
@@ -58,7 +57,6 @@ try
     };
     
     var response2 = await client.Models.GenerateContentAsync(
-        model: "gemini-2.0-flash-001",
         contents: "What are the three primary colors?",
         config: config
     );
@@ -73,7 +71,6 @@ try
     };
     
     var response3 = await client.Models.GenerateContentAsync(
-        model: "gemini-2.0-flash-001",
         contents: "List 3 programming languages with their year of creation as a JSON array",
         config: jsonConfig
     );

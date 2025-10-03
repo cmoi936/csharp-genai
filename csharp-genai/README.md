@@ -36,12 +36,14 @@ Install-Package Google.GenAI
 using Google.GenAI;
 using Google.GenAI.Types;
 
-// Create a client with API key
-var client = new GeminiChatClient(apiKey: "YOUR_GEMINI_API_KEY");
+// Create a client with API key and model
+var client = new GeminiChatClient(
+    apiKey: "YOUR_GEMINI_API_KEY", 
+    model: "gemini-2.0-flash-001"
+);
 
-// Generate content
+// Generate content (model is already configured)
 var response = await client.Models.GenerateContentAsync(
-    model: "gemini-2.0-flash-001",
     contents: "Why is the sky blue?"
 );
 
@@ -56,16 +58,16 @@ Console.WriteLine(response.Text);
 using Google.GenAI;
 using Google.GenAI.Types;
 
-// Create a client for Vertex AI
+// Create a client for Vertex AI with model
 var client = new GeminiChatClient(
     vertexAi: true,
     projectId: "your-project-id",
-    location: "us-central1"
+    location: "us-central1",
+    model: "gemini-2.0-flash-001"
 );
 
-// Generate content
+// Generate content (model is already configured)
 var response = await client.Models.GenerateContentAsync(
-    model: "gemini-2.0-flash-001",
     contents: "Tell me a story"
 );
 
@@ -80,10 +82,13 @@ Set the `GEMINI_API_KEY` or `GOOGLE_API_KEY` environment variable:
 export GEMINI_API_KEY='your-api-key'
 ```
 
-Then create a client without explicitly passing the API key:
+Then create a client with the model (API key is read from environment):
 
 ```csharp
-var client = new GeminiChatClient();
+var client = new GeminiChatClient(
+    apiKey: null,  // Will use GEMINI_API_KEY from environment
+    model: "gemini-2.0-flash-001"
+);
 ```
 
 ## Microsoft.Extensions.AI Compatibility
@@ -130,7 +135,6 @@ var config = new GenerateContentConfig
 };
 
 var response = await client.Models.GenerateContentAsync(
-    model: "gemini-2.0-flash-001",
     contents: "high",
     config: config
 );
@@ -160,7 +164,6 @@ var content = new Content
 };
 
 var response = await client.Models.GenerateContentAsync(
-    model: "gemini-2.0-flash-001",
     contents: content
 );
 
@@ -181,7 +184,6 @@ var config = new GenerateContentConfig
 };
 
 var response = await client.Models.GenerateContentAsync(
-    model: "gemini-2.0-flash-001",
     contents: "Give me a list of 3 popular programming languages",
     config: config
 );
@@ -196,11 +198,13 @@ All async methods have synchronous counterparts:
 ```csharp
 using Google.GenAI;
 
-var client = new GeminiChatClient();
+var client = new GeminiChatClient(
+    apiKey: null,  // Will use environment variable
+    model: "gemini-2.0-flash-001"
+);
 
 // Synchronous call
 var response = client.Models.GenerateContent(
-    model: "gemini-2.0-flash-001",
     contents: "Hello, world!"
 );
 
@@ -212,10 +216,11 @@ Console.WriteLine(response.Text);
 The client implements `IDisposable` and should be disposed when no longer needed:
 
 ```csharp
-using (var client = new GeminiChatClient())
+using (var client = new GeminiChatClient(
+    apiKey: null,  // Uses environment variable
+    model: "gemini-2.0-flash-001"))
 {
     var response = await client.Models.GenerateContentAsync(
-        model: "gemini-2.0-flash-001",
         contents: "Hello!"
     );
     Console.WriteLine(response.Text);
@@ -225,11 +230,13 @@ using (var client = new GeminiChatClient())
 Or manually:
 
 ```csharp
-var client = new GeminiChatClient();
+var client = new GeminiChatClient(
+    apiKey: null,  // Uses environment variable
+    model: "gemini-2.0-flash-001"
+);
 try
 {
     var response = await client.Models.GenerateContentAsync(
-        model: "gemini-2.0-flash-001",
         contents: "Hello!"
     );
     Console.WriteLine(response.Text);

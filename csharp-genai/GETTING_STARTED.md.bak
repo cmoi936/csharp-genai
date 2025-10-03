@@ -71,10 +71,11 @@ using Google.GenAI;
 using Google.GenAI.Types;
 
 // Create a client
-using var client = new GeminiChatClient(apiKey: null, model: "gemini-2.0-flash-001");
+using var client = new GeminiChatClient();
 
 // Generate content
 var response = await client.Models.GenerateContentAsync(
+    model: "gemini-2.0-flash-001",
     contents: "Explain quantum computing in simple terms"
 );
 
@@ -94,9 +95,10 @@ dotnet run
 ```csharp
 using Google.GenAI;
 
-using var client = new GeminiChatClient(apiKey: "your-api-key", model: "gemini-2.0-flash-001");
+using var client = new GeminiChatClient(apiKey: "your-api-key");
 
 var response = await client.Models.GenerateContentAsync(
+    model: "gemini-2.0-flash-001",
     contents: "Write a haiku about programming"
 );
 
@@ -109,7 +111,7 @@ Console.WriteLine(response.Text);
 using Google.GenAI;
 using Google.GenAI.Types;
 
-using var client = new GeminiChatClient(apiKey: null, model: "gemini-2.0-flash-001");
+using var client = new GeminiChatClient();
 
 var config = new GenerateContentConfig
 {
@@ -121,6 +123,7 @@ var config = new GenerateContentConfig
 };
 
 var response = await client.Models.GenerateContentAsync(
+    model: "gemini-2.0-flash-001",
     contents: "Write a short story about a robot",
     config: config
 );
@@ -134,7 +137,7 @@ Console.WriteLine(response.Text);
 using Google.GenAI;
 using Google.GenAI.Types;
 
-using var client = new GeminiChatClient(apiKey: null, model: "gemini-2.0-flash-001");
+using var client = new GeminiChatClient();
 
 var content = new Content
 {
@@ -150,6 +153,7 @@ var content = new Content
 };
 
 var response = await client.Models.GenerateContentAsync(
+    model: "gemini-2.0-flash-001",
     contents: content
 );
 
@@ -162,7 +166,7 @@ Console.WriteLine(response.Text);
 using Google.GenAI;
 using Google.GenAI.Types;
 
-using var client = new GeminiChatClient(apiKey: null, model: "gemini-2.0-flash-001");
+using var client = new GeminiChatClient();
 
 var config = new GenerateContentConfig
 {
@@ -170,6 +174,7 @@ var config = new GenerateContentConfig
 };
 
 var response = await client.Models.GenerateContentAsync(
+    model: "gemini-2.0-flash-001",
     contents: "List 5 planets with their distance from the sun",
     config: config
 );
@@ -184,7 +189,7 @@ If you prefer synchronous code:
 ```csharp
 using Google.GenAI;
 
-using var client = new GeminiChatClient(apiKey: null, model: "gemini-2.0-flash-001");
+using var client = new GeminiChatClient();
 
 // Synchronous call
 var response = client.Models.GenerateContent(
@@ -207,6 +212,7 @@ using var client = new GeminiChatClient(
 );
 
 var response = await client.Models.GenerateContentAsync(
+    model: "gemini-2.0-flash-001",
     contents: "Hello from Vertex AI!"
 );
 
@@ -220,9 +226,10 @@ Console.WriteLine(response.Text);
 Always use `using` statements or manually dispose the client:
 
 ```csharp
-using (var client = new GeminiChatClient(apiKey: null, model: "gemini-2.0-flash-001"))
+using (var client = new GeminiChatClient())
 {
     var response = await client.Models.GenerateContentAsync(
+        model: "gemini-2.0-flash-001",
         contents: "Hello!"
     );
     Console.WriteLine(response.Text);
@@ -237,8 +244,9 @@ using Google.GenAI;
 
 try
 {
-    using var client = new GeminiChatClient(apiKey: null, model: "gemini-2.0-flash-001");
+    using var client = new GeminiChatClient();
     var response = await client.Models.GenerateContentAsync(
+        model: "invalid-model-name",
         contents: "Hello!"
     );
     Console.WriteLine(response.Text);

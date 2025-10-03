@@ -35,8 +35,9 @@ namespace Google.GenAI.Models
         private readonly bool _vertexAi;
         private readonly string? _projectId;
         private readonly string? _location;
+        private readonly string _defaultModel;
 
-        internal ModelsClient(GeminiChatClient client, HttpClient httpClient, string? apiKey, bool vertexAi, string? projectId, string? location)
+        internal ModelsClient(GeminiChatClient client, HttpClient httpClient, string? apiKey, bool vertexAi, string? projectId, string? location, string defaultModel)
         {
             _client = client;
             _httpClient = httpClient;
@@ -44,23 +45,22 @@ namespace Google.GenAI.Models
             _vertexAi = vertexAi;
             _projectId = projectId;
             _location = location;
+            _defaultModel = defaultModel;
         }
 
         /// <summary>
-        /// Generates content using the specified model.
+        /// Generates content using the configured model.
         /// </summary>
-        /// <param name="model">The model ID (e.g., "gemini-2.0-flash-001").</param>
         /// <param name="contents">The content to send to the model (string or Content object).</param>
         /// <param name="config">Optional configuration for generation.</param>
         /// <param name="cancellationToken">Cancellation token.</param>
         /// <returns>The generated content response.</returns>
         public async Task<GenerateContentResponse> GenerateContentAsync(
-            string model,
             object contents,
             GenerateContentConfig? config = null,
             CancellationToken cancellationToken = default)
         {
-            var url = BuildUrl(model, "generateContent");
+            var url = BuildUrl(_defaultModel, "generateContent");
             var request = BuildRequest(contents, config);
 
             var response = await _httpClient.PostAsJsonAsync(url, request, cancellationToken);
@@ -73,14 +73,13 @@ namespace Google.GenAI.Models
         }
 
         /// <summary>
-        /// Generates content using the specified model (synchronous).
+        /// Generates content using the configured model (synchronous).
         /// </summary>
         public GenerateContentResponse GenerateContent(
-            string model,
             object contents,
             GenerateContentConfig? config = null)
         {
-            return GenerateContentAsync(model, contents, config).GetAwaiter().GetResult();
+            return GenerateContentAsync(contents, config).GetAwaiter().GetResult();
         }
 
         private string BuildUrl(string model, string operation)
