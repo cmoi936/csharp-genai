@@ -76,3 +76,4 @@ artifacts/
 # macOS
 .DS_Store
 /src/Google.GenAI/Properties/PublishProfiles/FolderProfile.pubxml
+/samples/QuickStart/Properties/launchSettings.json

@@ -8,6 +8,10 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="Microsoft.Agents.AI.Workflows" Version="1.0.0-preview.251001.3" />
+  </ItemGroup>
+
+  <ItemGroup>
     <ProjectReference Include="../../src/Google.GenAI/Google.GenAI.csproj" />
   </ItemGroup>
 

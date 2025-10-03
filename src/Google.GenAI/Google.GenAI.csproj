@@ -10,14 +10,12 @@
     <Company>Google LLC</Company>
     <Description>Google Gen AI SDK for .NET</Description>
     <PackageLicenseExpression>Apache-2.0</PackageLicenseExpression>
-    <PackageProjectUrl>https://github.com/googleapis/python-genai</PackageProjectUrl>
-    <RepositoryUrl>https://github.com/googleapis/python-genai</RepositoryUrl>
     <PackageTags>Google;GenAI;Gemini;AI;ML</PackageTags>
   </PropertyGroup>
 
   <ItemGroup>
     <PackageReference Include="Google.Apis.Auth" Version="1.71.0" />
-    <PackageReference Include="Microsoft.Extensions.AI" Version="9.0.0-preview.9.24556.5" />
+    <PackageReference Include="Microsoft.Agents.AI.Workflows" Version="1.0.0-preview.251001.3" />
     <PackageReference Include="System.Net.Http.Json" Version="9.0.9" />
     <PackageReference Include="System.Text.Json" Version="9.0.9" />
   </ItemGroup>

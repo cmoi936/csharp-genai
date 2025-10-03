@@ -13,7 +13,7 @@
 // limitations under the License.
 
 using Google.GenAI;
-using Google.GenAI.Types;
+using Microsoft.Agents.AI;
 
 Console.WriteLine("Google Gen AI SDK for C# - Quick Start");
 Console.WriteLine("========================================\n");
@@ -34,49 +34,24 @@ if (string.IsNullOrEmpty(apiKey))
 try
 {
     // Create client with API key and model
-    using var client = new GeminiChatClient(apiKey: apiKey, model: "gemini-2.0-flash-001");
+    using IChatClient chatClient = new GeminiChatClient(apiKey: apiKey, model: "gemini-2.0-flash-001");
 
     Console.WriteLine("✓ Client created successfully\n");
 
-    // Example 1: Simple text generation
-    Console.WriteLine("Example 1: Simple Text Generation");
-    Console.WriteLine("----------------------------------");
-    var response1 = await client.Models.GenerateContentAsync(
-        contents: "Why is the sky blue? Answer in one sentence."
-    );
-    Console.WriteLine($"Response: {response1.Text}\n");
-
-    // Example 2: Using configuration
-    Console.WriteLine("Example 2: With Configuration");
-    Console.WriteLine("-----------------------------");
-    var config = new GenerateContentConfig
+    // Create chat messages
+    var messages = new List<ChatMessage>
     {
-        Temperature = 0.7,
-        MaxOutputTokens = 100,
-        SystemInstruction = "You are a helpful assistant. Keep answers concise."
+        new ChatMessage
+        {
+            Role = "user",
+            Text = "Write a story about a programmer who discovers a hidden feature in their favorite programming language."
+        }
     };
 
-    var response2 = await client.Models.GenerateContentAsync(
-        contents: "What are the three primary colors?",
-        config: config
-    );
-    Console.WriteLine($"Response: {response2.Text}\n");
+    // Get response
+    var response = await chatClient.GetResponseAsync(messages);
 
-    // Example 3: JSON response
-    Console.WriteLine("Example 3: JSON Response");
-    Console.WriteLine("------------------------");
-    var jsonConfig = new GenerateContentConfig
-    {
-        ResponseMimeType = "application/json"
-    };
-
-    var response3 = await client.Models.GenerateContentAsync(
-        contents: "List 3 programming languages with their year of creation as a JSON array",
-        config: jsonConfig
-    );
-    Console.WriteLine($"Response: {response3.Text}\n");
-
-    Console.WriteLine("✓ All examples completed successfully!");
+    Console.WriteLine(response.Text);
 }
 catch (Exception ex)
 {
