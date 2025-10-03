@@ -13,7 +13,7 @@
 // limitations under the License.
 
 using Google.GenAI;
-using Microsoft.Agents.AI;
+using Microsoft.Extensions.AI;
 
 Console.WriteLine("Google Gen AI SDK for C# - Quick Start");
 Console.WriteLine("========================================\n");
@@ -41,11 +41,7 @@ try
     // Create chat messages
     var messages = new List<ChatMessage>
     {
-        new ChatMessage
-        {
-            Role = "user",
-            Text = "Write a story about a programmer who discovers a hidden feature in their favorite programming language."
-        }
+        new ChatMessage(ChatRole.User, "Write a story about a programmer who discovers a hidden feature in their favorite programming language.")
     };
 
     // Get response
