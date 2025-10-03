@@ -19,7 +19,7 @@ Console.WriteLine("Google Gen AI SDK for C# - Quick Start");
 Console.WriteLine("========================================\n");
 
 // Check for API key in environment
-var apiKey = Environment.GetEnvironmentVariable("GEMINI_API_KEY") 
+var apiKey = Environment.GetEnvironmentVariable("GEMINI_API_KEY")
              ?? Environment.GetEnvironmentVariable("GOOGLE_API_KEY");
 
 if (string.IsNullOrEmpty(apiKey))
@@ -35,7 +35,7 @@ try
 {
     // Create client with API key and model
     using var client = new GeminiChatClient(apiKey: apiKey, model: "gemini-2.0-flash-001");
-    
+
     Console.WriteLine("✓ Client created successfully\n");
 
     // Example 1: Simple text generation
@@ -55,7 +55,7 @@ try
         MaxOutputTokens = 100,
         SystemInstruction = "You are a helpful assistant. Keep answers concise."
     };
-    
+
     var response2 = await client.Models.GenerateContentAsync(
         contents: "What are the three primary colors?",
         config: config
@@ -69,7 +69,7 @@ try
     {
         ResponseMimeType = "application/json"
     };
-    
+
     var response3 = await client.Models.GenerateContentAsync(
         contents: "List 3 programming languages with their year of creation as a JSON array",
         config: jsonConfig

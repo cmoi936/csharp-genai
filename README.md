@@ -1,7 +1,7 @@
 # Google Gen AI SDK for C#/.NET
 
 [![NuGet](https://img.shields.io/badge/nuget-v1.0.0-blue)](https://www.nuget.org/)
-![.NET](https://img.shields.io/badge/.NET-8.0-purple)
+![.NET](https://img.shields.io/badge/.NET-9.0-purple)
 
 --------
 **Documentation:** https://googleapis.github.io/python-genai/

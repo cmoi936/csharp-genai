@@ -1,4 +1,4 @@
-// Copyright 2025 Google LLC
+﻿// Copyright 2025 Google LLC
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -12,16 +12,10 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Net.Http;
 using System.Runtime.CompilerServices;
-using System.Threading;
-using System.Threading.Tasks;
-using Microsoft.Extensions.AI;
 using Google.GenAI.Models;
 using Google.GenAI.Types;
+using Microsoft.Extensions.AI;
 
 namespace Google.GenAI
 {
@@ -83,7 +77,7 @@ namespace Google.GenAI
         {
             if (!vertexAi)
                 throw new ArgumentException("When using this constructor, vertexAi must be true");
-            
+
             _vertexAi = true;
             _projectId = projectId ?? throw new ArgumentNullException(nameof(projectId));
             _location = location ?? throw new ArgumentNullException(nameof(location));
@@ -99,7 +93,7 @@ namespace Google.GenAI
 
         private static string? GetApiKeyFromEnvironment()
         {
-            return Environment.GetEnvironmentVariable("GOOGLE_API_KEY") 
+            return Environment.GetEnvironmentVariable("GOOGLE_API_KEY")
                    ?? Environment.GetEnvironmentVariable("GEMINI_API_KEY");
         }
 
@@ -110,7 +104,7 @@ namespace Google.GenAI
             {
                 Timeout = httpOptions?.Timeout ?? TimeSpan.FromMinutes(2)
             };
-            
+
             return client;
         }
 
@@ -128,13 +122,13 @@ namespace Google.GenAI
         {
             // Convert ChatMessage to our Content format
             var contents = ConvertChatMessagesToContents(chatMessages);
-            
+
             // Build config from ChatOptions
             var config = BuildGenerateContentConfig(options);
-            
+
             // Call our existing generate content method (uses the default model from constructor)
             var response = await _models.GenerateContentAsync(contents, config, cancellationToken);
-            
+
             // Convert response to ChatCompletion
             return ConvertToChatCompletion(response, _defaultModelId);
         }
@@ -154,7 +148,7 @@ namespace Google.GenAI
             // For now, return a single completion as a stream
             // Full streaming support can be added later
             var completion = await CompleteAsync(chatMessages, options, cancellationToken);
-            
+
             yield return new StreamingChatCompletionUpdate
             {
                 CompletionId = completion.CompletionId,
@@ -176,14 +170,14 @@ namespace Google.GenAI
             {
                 return this as TService;
             }
-            
+
             return null;
         }
 
         private List<Content> ConvertChatMessagesToContents(IList<ChatMessage> chatMessages)
         {
             var contents = new List<Content>();
-            
+
             foreach (var message in chatMessages)
             {
                 var content = new Content
@@ -191,7 +185,7 @@ namespace Google.GenAI
                     Role = message.Role.Value.ToLowerInvariant(),
                     Parts = new List<Part>()
                 };
-                
+
                 foreach (var item in message.Contents)
                 {
                     if (item is TextContent textContent)
@@ -206,10 +200,10 @@ namespace Google.GenAI
                         ));
                     }
                 }
-                
+
                 contents.Add(content);
             }
-            
+
             return contents;
         }
 
@@ -217,14 +211,14 @@ namespace Google.GenAI
         {
             if (options == null)
                 return null;
-                
+
             return new GenerateContentConfig
             {
                 Temperature = options.Temperature,
                 MaxOutputTokens = options.MaxOutputTokens,
                 TopP = options.TopP,
-                ResponseMimeType = options.ResponseFormat == ChatResponseFormat.Json 
-                    ? "application/json" 
+                ResponseMimeType = options.ResponseFormat == ChatResponseFormat.Json
+                    ? "application/json"
                     : null
             };
         }
@@ -236,7 +230,7 @@ namespace Google.GenAI
                 Role = ChatRole.Assistant,
                 Contents = new List<AIContent>()
             };
-            
+
             if (response.Candidates.Count > 0 && response.Candidates[0].Content != null)
             {
                 var candidate = response.Candidates[0];
@@ -252,7 +246,7 @@ namespace Google.GenAI
                     }
                 }
             }
-            
+
             var completion = new ChatCompletion(chatMessage)
             {
                 ModelId = modelId,
@@ -263,7 +257,7 @@ namespace Google.GenAI
                     _ => null
                 }
             };
-            
+
             return completion;
         }
 
